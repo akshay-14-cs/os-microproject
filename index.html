@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Replacement Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap');
+        body { font-family: 'Urbanist', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .frame-box { transition: all 0.3s ease; }
+        .fault { background-color: #ef4444; border-color: #dc2626; color: white; }
+        .hit { background-color: #22c55e; border-color: #16a34a; color: white; }
+        .empty { background-color: #1e293b; border-color: #334155; color: #64748b; }
+        .animate-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body class="min-h-screen p-8 flex flex-col items-center relative">
+
+    <div class="max-w-5xl w-full">
+        
+        <div class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 mb-4">
+                Page Replacement Visualizer
+            </h1>
+            <p class="text-slate-400 text-lg"></p>
+        </div>
+
+       
+        <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="col-span-1 md:col-span-3">
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Page Reference String (comma separated)</label>
+                    <input type="text" id="refString" value="7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Number of Frames</label>
+                    <input type="number" id="frameCount" value="3" min="1" max="6" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Algorithm</label>
+                    <select id="algorithm" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
+                        <option value="FIFO">First In First Out (FIFO)</option>
+                        <option value="LRU">Least Recently Used (LRU)</option>
+                        <option value="Optimal">Optimal Page Replacement</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button onclick="simulate()" id="simBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform transition active:scale-95">
+                        <i class="fas fa-play mr-2"></i> Simulate Algorithm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    
+        <div id="resultsArea" class="hidden">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
+                    <p class="text-slate-400 text-sm mb-1">Total Pages</p>
+                    <p id="statTotal" class="text-3xl font-bold text-white">0</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
+                    <p class="text-slate-400 text-sm mb-1">Page Faults</p>
+                    <p id="statFaults" class="text-3xl font-bold text-red-400">0</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
+                    <p class="text-slate-400 text-sm mb-1">Page Hits</p>
+                    <p id="statHits" class="text-3xl font-bold text-green-400">0</p>
+                </div>
+                
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center relative">
+                    <div class="flex items-center justify-center gap-2 mb-1">
+                        <p class="text-slate-400 text-sm">Hit Ratio</p>
+                        <button onclick="showFormulaModal()" class="text-slate-400 hover:text-emerald-400 transition-colors" title="How is this calculated?">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                    </div>
+                    <p id="statRatio" class="text-3xl font-bold text-blue-400">0%</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 overflow-x-auto">
+                <div id="visualization" class="flex gap-4 pb-4" style="min-width: max-content;"></div>
+            </div>
+            
+            <div class="mt-4 flex justify-center gap-6 text-sm text-slate-400">
+                <div class="flex items-center"><span class="w-4 h-4 rounded bg-red-500 mr-2"></span> Page Fault</div>
+                <div class="flex items-center"><span class="w-4 h-4 rounded bg-green-500 mr-2"></span> Page Hit</div>
+            </div>
+        </div>
+    </div>
+
+   
+    <div id="formulaModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center transition-opacity">
+        <div class="bg-slate-800 p-8 rounded-2xl border border-slate-600 shadow-2xl max-w-md w-full text-center">
+            <div class="text-emerald-400 text-5xl mb-4">
+                <i class="fas fa-calculator"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-4">How Hit Ratio is Calculated</h3>
+            
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 mb-6">
+                <p class="text-emerald-400 font-mono text-xl mb-2">
+                    <span class="text-white">(</span>Hits <span class="text-white">÷</span> Total Pages<span class="text-white">)</span> × 100
+                </p>
+                <div class="h-px bg-slate-700 w-full my-3"></div>
+                <p id="dynamicFormula" class="text-blue-400 font-mono text-lg">
+                    
+                </p>
+            </div>
+            
+            <p class="text-slate-400 text-sm mb-8 leading-relaxed">
+                The Hit Ratio represents the percentage of time the Operating System found the requested page already sitting in the memory frames, avoiding a costly Page Fault.
+            </p>
+            
+            <button onclick="closeFormulaModal()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform transition active:scale-95">
+                Got it!
+            </button>
+        </div>
+    </div>
+
+    <script>
+        
+        let currentHits = 0;
+        let currentTotal = 0;
+
+        async function simulate() {
+            const btn = document.getElementById('simBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Running in WSL...';
+            
+            const payload = {
+                refString: document.getElementById('refString').value,
+                frameCount: parseInt(document.getElementById('frameCount').value),
+                algorithm: document.getElementById('algorithm').value
+            };
+
+            try {
+                
+                const response = await fetch('http://localhost:3000/api/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                
+                if(data.error) throw new Error(data.error);
+
+                renderResults(data, payload.frameCount);
+                
+            } catch (error) {
+                alert("Error connecting to WSL Backend: " + error.message + "\nMake sure your Node server is running on port 3000!");
+            } finally {
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function renderResults(data, frameCount) {
+            document.getElementById('resultsArea').classList.remove('hidden');
+     
+            currentHits = data.hits;
+            currentTotal = data.total;
+            document.getElementById('statTotal').innerText = data.total;
+            document.getElementById('statFaults').innerText = data.faults;
+            document.getElementById('statHits').innerText = data.hits;
+            const ratio = ((data.hits / data.total) * 100).toFixed(1);
+            document.getElementById('statRatio').innerText = `${ratio}%`;
+
+            const visContainer = document.getElementById('visualization');
+            visContainer.innerHTML = ''; 
+
+            data.steps.forEach((step, index) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'flex flex-col items-center gap-2 animate-pop';
+                stepDiv.style.animationDelay = `${index * 0.1}s`;
+
+                const isHit = step.status === "HIT";
+              
+                const reqDiv = document.createElement('div');
+                reqDiv.className = `w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg mb-2 shadow-lg ${isHit ? 'hit' : 'fault'}`;
+                reqDiv.innerText = step.page;
+                stepDiv.appendChild(reqDiv);
+
+                for (let i = 0; i < frameCount; i++) {
+                    const frameDiv = document.createElement('div');
+                    const frameVal = step.frames[i];
+                    
+                    frameDiv.className = `w-12 h-12 rounded border-2 flex items-center justify-center font-bold text-lg frame-box ${frameVal === null ? 'empty' : 'bg-slate-700 border-slate-500 text-white'}`;
+                    frameDiv.innerText = frameVal === null ? '-' : frameVal;
+                    stepDiv.appendChild(frameDiv);
+                }
+
+                const statusLabel = document.createElement('div');
+                statusLabel.className = `text-xs font-bold mt-2 px-2 py-1 rounded ${isHit ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10'}`;
+                statusLabel.innerText = step.status;
+                stepDiv.appendChild(statusLabel);
+
+                visContainer.appendChild(stepDiv);
+            });
+        }
+
+        function showFormulaModal() {
+           
+            const dynamicMath = `(${currentHits} ÷ ${currentTotal}) × 100 = ${((currentHits/currentTotal)*100).toFixed(1)}%`;
+            document.getElementById('dynamicFormula').innerText = dynamicMath;
+        
+            document.getElementById('formulaModal').classList.remove('hidden');
+        }
+        function closeFormulaModal() {
+            document.getElementById('formulaModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
