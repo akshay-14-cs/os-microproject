@@ -171,6 +171,7 @@
             <div class="p-8 md:w-1/2 overflow-y-auto border-r border-slate-700">
                 <h3 class="text-3xl font-bold text-blue-400 mb-6"><i class="fas fa-book-reader mr-2"></i> OS Core Concepts</h3>
                 <div class="space-y-4">
+                    
                     <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
                         <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-file-alt text-emerald-400 mr-2"></i> What is a Page?</h4>
                         <p class="text-sm text-slate-400">A page is a small fixed-size part of a program that is loaded from the hard disk into RAM when needed.</p>
@@ -190,6 +191,20 @@
                         <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-exchange-alt text-purple-400 mr-2"></i> Page Replacement</h4>
                       <p class="text-sm text-slate-400">Page replacement happens when RAM is full and a new page needs to be loaded. The OS removes one page and loads the new one.</p>
                       <p class="text-sm text-slate-400">Page Replacement तेव्हा होते जेव्हा RAM full असते आणि नवीन page load करायचा असतो. तेव्हा Operating System एक जुना page काढून नवीन page RAM मध्ये load करते.</p>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 border-l-4 border-l-yellow-400 mt-6">
+                        <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-sort-numeric-down text-yellow-400 mr-2"></i> FIFO (First-In, First-Out)</h4>
+                        <p class="text-sm text-slate-400">The simplest algorithm. The OS keeps track of all pages in memory in a queue. When a page needs to be replaced, the oldest page (the one that entered first) gets kicked out. <br><span class="text-xs text-yellow-500 font-semibold">Note: Can suffer from Belady's Anomaly!</span></p>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 border-l-4 border-l-orange-400">
+                        <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-history text-orange-400 mr-2"></i> LRU (Least Recently Used)</h4>
+                        <p class="text-sm text-slate-400">Replaces the page that has not been used for the longest period of time. It uses past history to predict the future, assuming that pages used recently will likely be used again soon.</p>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 border-l-4 border-l-pink-400">
+                        <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-eye text-pink-400 mr-2"></i> Optimal Page Replacement</h4>
+                        <p class="text-sm text-slate-400">Looks into the <b>future</b> and replaces the page that will not be needed for the longest time. It gives the lowest possible page faults, but it is impossible to implement in a real OS because computers cannot predict future CPU requests.</p>
                     </div>
                 </div>
             </div>
