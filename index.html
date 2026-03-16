@@ -37,7 +37,6 @@
             <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 mb-4">
                 Page Replacement Visualizer
             </h1>
-            <p class="text-slate-400 text-lg">Operating Systems Microproject</p>
         </div>
 
       
@@ -192,19 +191,23 @@
                       <p class="text-sm text-slate-400">Page replacement happens when RAM is full and a new page needs to be loaded. The OS removes one page and loads the new one.</p>
                       <p class="text-sm text-slate-400">Page Replacement तेव्हा होते जेव्हा RAM full असते आणि नवीन page load करायचा असतो. तेव्हा Operating System एक जुना page काढून नवीन page RAM मध्ये load करते.</p>
                     </div>
-                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 border-l-4 border-l-yellow-400 mt-6">
+                   <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 border-l-4 border-l-yellow-400 mt-6">
                         <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-sort-numeric-down text-yellow-400 mr-2"></i> FIFO (First-In, First-Out)</h4>
-                        <p class="text-sm text-slate-400">The simplest algorithm. The OS keeps track of all pages in memory in a queue. When a page needs to be replaced, the oldest page (the one that entered first) gets kicked out. <br><span class="text-xs text-yellow-500 font-semibold">Note: Can suffer from Belady's Anomaly!</span></p>
+                        <p class="text-sm text-slate-400 mb-2">The simplest algorithm. The OS keeps track of all pages in memory in a queue. When a page needs to be replaced, the oldest page (the one that entered first) gets kicked out.</p>
+                        <p class="text-sm text-slate-300 font-medium">हा सर्वात सोपा algorithm आहे. Operating System मेमरीमधील सर्व pages चा रेकॉर्ड एका रांगेत (queue मध्ये) ठेवते. जेव्हा एखादा page replace करायचा असतो, तेव्हा सर्वात जुना page (जो सर्वात आधी आला होता) बाहेर काढला जातो.</p>
+                        <p class="text-xs text-yellow-500 font-semibold mt-2">Note: Can suffer from Belady's Anomaly!</p>
                     </div>
 
                     <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 border-l-4 border-l-orange-400">
                         <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-history text-orange-400 mr-2"></i> LRU (Least Recently Used)</h4>
-                        <p class="text-sm text-slate-400">Replaces the page that has not been used for the longest period of time. It uses past history to predict the future, assuming that pages used recently will likely be used again soon.</p>
+                        <p class="text-sm text-slate-400 mb-2">Replaces the page that has not been used for the longest period of time. It uses past history to predict the future, assuming that pages used recently will likely be used again soon.</p>
+                        <p class="text-sm text-slate-300 font-medium">हा algorithm अशा page ला replace करतो जो सर्वात जास्त काळापासून वापरला गेलेला नाही. तो भविष्याचा अंदाज लावण्यासाठी भूतकाळाचा (past history) वापर करतो, असा विचार करून की जे pages अलीकडे वापरले गेले आहेत ते लवकरच पुन्हा वापरले जातील.</p>
                     </div>
 
                     <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 border-l-4 border-l-pink-400">
                         <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-eye text-pink-400 mr-2"></i> Optimal Page Replacement</h4>
-                        <p class="text-sm text-slate-400">Looks into the <b>future</b> and replaces the page that will not be needed for the longest time. It gives the lowest possible page faults, but it is impossible to implement in a real OS because computers cannot predict future CPU requests.</p>
+                        <p class="text-sm text-slate-400 mb-2">Looks into the <b>future</b> and replaces the page that will not be needed for the longest time. It gives the lowest possible page faults, but it is impossible to implement in a real OS because computers cannot predict future CPU requests.</p>
+                        <p class="text-sm text-slate-300 font-medium">हा algorithm भविष्यात पाहतो आणि अशा page ला replace करतो ज्याची सर्वात जास्त काळासाठी गरज भासणार नाही. याच्यामुळे सर्वात कमी page faults होतात, पण खऱ्या Operating System मध्ये हे वापरणे अशक्य आहे कारण संगणक भविष्यातील CPU requests चा अंदाज आधीच लावू शकत नाही.</p>
                     </div>
                 </div>
             </div>
