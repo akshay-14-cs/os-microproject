@@ -14,6 +14,18 @@
         .hit { background-color: #22c55e; border-color: #16a34a; color: white; }
         .empty { background-color: #1e293b; border-color: #334155; color: #64748b; }
         .animate-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        .page-anim-box {
+            position: absolute;
+            transition: all 1.5s ease-in-out;
+            left: 20px;
+            top: 20px;
+        }
+        .move-to-ram {
+            transform: translateX(250px);
+            background-color: #22c55e;
+        }
+
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
@@ -21,17 +33,17 @@
 
     <div class="max-w-5xl w-full">
         
-        <div class="text-center mb-10">
+        <div class="text-center mb-8">
             <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 mb-4">
                 Page Replacement Visualizer
             </h1>
-            <p class="text-slate-400 text-lg"></p>
+            <p class="text-slate-400 text-lg">Operating Systems Microproject</p>
         </div>
 
-       
+      
         <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 mb-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="col-span-1 md:col-span-3">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="col-span-1 md:col-span-4">
                     <label class="block text-sm font-medium text-slate-300 mb-2">Page Reference String (comma separated)</label>
                     <input type="text" id="refString" value="7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
                 </div>
@@ -39,7 +51,7 @@
                     <label class="block text-sm font-medium text-slate-300 mb-2">Number of Frames</label>
                     <input type="number" id="frameCount" value="3" min="1" max="6" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
                 </div>
-                <div>
+                <div class="col-span-2">
                     <label class="block text-sm font-medium text-slate-300 mb-2">Algorithm</label>
                     <select id="algorithm" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
                         <option value="FIFO">First In First Out (FIFO)</option>
@@ -47,9 +59,12 @@
                         <option value="Optimal">Optimal Page Replacement</option>
                     </select>
                 </div>
-                <div class="flex items-end">
-                    <button onclick="simulate()" id="simBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform transition active:scale-95">
-                        <i class="fas fa-play mr-2"></i> Simulate Algorithm
+                <div class="flex items-end gap-2">
+                    <button onclick="simulate()" id="simBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-3 px-2 rounded-lg shadow-lg transform transition active:scale-95">
+                        <i class="fas fa-play"></i> Simulate
+                    </button>
+                    <button onclick="showTheoryModal()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-2 rounded-lg shadow-lg transform transition active:scale-95 text-sm">
+                        <i class="fas fa-book-open"></i> Theory
                     </button>
                 </div>
             </div>
@@ -57,6 +72,7 @@
 
     
         <div id="resultsArea" class="hidden">
+      
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
                     <p class="text-slate-400 text-sm mb-1">Total Pages</p>
@@ -71,6 +87,7 @@
                     <p id="statHits" class="text-3xl font-bold text-green-400">0</p>
                 </div>
                 
+            
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center relative">
                     <div class="flex items-center justify-center gap-2 mb-1">
                         <p class="text-slate-400 text-sm">Hit Ratio</p>
@@ -82,18 +99,47 @@
                 </div>
             </div>
 
-            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 overflow-x-auto">
-                <div id="visualization" class="flex gap-4 pb-4" style="min-width: max-content;"></div>
-            </div>
             
-            <div class="mt-4 flex justify-center gap-6 text-sm text-slate-400">
-                <div class="flex items-center"><span class="w-4 h-4 rounded bg-red-500 mr-2"></span> Page Fault</div>
-                <div class="flex items-center"><span class="w-4 h-4 rounded bg-green-500 mr-2"></span> Page Hit</div>
+            <h2 class="text-xl font-bold text-slate-300 mb-3"><i class="fas fa-cubes mr-2"></i> Memory Frame Visualization</h2>
+            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 overflow-x-auto mb-8">
+                <div id="visualization" class="flex gap-4 pb-4 items-end" style="min-width: max-content;"></div>
+                
+                <div class="mt-4 flex justify-center gap-6 text-sm text-slate-400 border-t border-slate-700 pt-4">
+                    <div class="flex items-center"><span class="w-4 h-4 rounded bg-red-500 mr-2"></span> Page Fault</div>
+                    <div class="flex items-center"><span class="w-4 h-4 rounded bg-green-500 mr-2"></span> Page Hit</div>
+                </div>
+            </div>
+
+      
+            <h2 class="text-xl font-bold text-slate-300 mb-3"><i class="fas fa-list-ol mr-2"></i> Step-by-Step Algorithm Breakdown</h2>
+            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 max-h-96 overflow-y-auto" id="stepLogs">
+            
             </div>
         </div>
-    </div>
 
    
+        <div id="creditsFooter" class="hidden mt-12 pt-8 border-t border-slate-700 w-full flex flex-col sm:flex-row justify-between gap-12 mb-4">
+            <div class="text-left">
+                <h3 class="text-slate-300 font-bold mb-3 uppercase tracking-wider text-xs"><i class="fas fa-laptop-code mr-2 text-blue-400"></i>Developed by</h3>
+                <ul class="text-slate-400 text-sm space-y-2">
+                    <li>1) Akshay Nandurake <span class="text-slate-500 bg-slate-800/50 border border-slate-700 px-2 py-0.5 rounded ml-1">2406131</span></li>
+                    <li>2) Vedant Nirmal <span class="text-slate-500 bg-slate-800/50 border border-slate-700 px-2 py-0.5 rounded ml-1">2406136</span></li>
+                    <li>3) Nachiket Kulkarni <span class="text-slate-500 bg-slate-800/50 border border-slate-700 px-2 py-0.5 rounded ml-1">2406113</span></li>
+                    <li>4) Swapnil Kharabe <span class="text-slate-500 bg-slate-800/50 border border-slate-700 px-2 py-0.5 rounded ml-1">2406106</span></li>
+                </ul>
+            </div>
+            
+            
+            <div class="text-left sm:text-right">
+                <h3 class="text-slate-300 font-bold mb-3 uppercase tracking-wider text-xs"><i class="fas fa-chalkboard-teacher mr-2 text-emerald-400"></i>Under the guidance of</h3>
+                <p class="text-emerald-400 font-bold text-lg mb-1">Dr. S.B. Nikam</p>
+                <p class="text-slate-400 text-sm">(Senior Lecturer)</p>
+                <p class="text-slate-400 text-sm">GP Pune</p>
+            </div>
+        </div>
+
+    </div>
+
     <div id="formulaModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center transition-opacity">
         <div class="bg-slate-800 p-8 rounded-2xl border border-slate-600 shadow-2xl max-w-md w-full text-center">
             <div class="text-emerald-400 text-5xl mb-4">
@@ -106,9 +152,7 @@
                     <span class="text-white">(</span>Hits <span class="text-white">÷</span> Total Pages<span class="text-white">)</span> × 100
                 </p>
                 <div class="h-px bg-slate-700 w-full my-3"></div>
-                <p id="dynamicFormula" class="text-blue-400 font-mono text-lg">
-                    
-                </p>
+                <p id="dynamicFormula" class="text-blue-400 font-mono text-lg"></p>
             </div>
             
             <p class="text-slate-400 text-sm mb-8 leading-relaxed">
@@ -121,15 +165,72 @@
         </div>
     </div>
 
+    <div id="theoryModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center transition-opacity p-4">
+        <div class="bg-slate-800 rounded-2xl border border-slate-600 shadow-2xl max-w-4xl w-full flex flex-col md:flex-row overflow-hidden max-h-[90vh]">
+            
+            <div class="p-8 md:w-1/2 overflow-y-auto border-r border-slate-700">
+                <h3 class="text-3xl font-bold text-blue-400 mb-6"><i class="fas fa-book-reader mr-2"></i> OS Core Concepts</h3>
+                <div class="space-y-4">
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                        <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-file-alt text-emerald-400 mr-2"></i> What is a Page?</h4>
+                        <p class="text-sm text-slate-400">A page is a small fixed-size part of a program that is loaded from the hard disk into RAM when needed.</p>
+                        <p class="text-sm text-slate-400">Page म्हणजे प्रोग्रामचा लहान fixed-size भाग जो गरज पडल्यावर Hard Disk वरून RAM मध्ये load केला जातो.</p>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                        <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-border-all text-blue-400 mr-2"></i> What is a Frame?</h4>
+                        <p class="text-sm text-slate-400">A frame is a fixed-size space in RAM where a page is stored.</p>
+                        <p class="text-sm text-slate-400">Frame म्हणजे RAM मधील fixed-size जागा ज्यामध्ये page store केला जातो.</p>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                        <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-exclamation-triangle text-red-400 mr-2"></i> Page Fault</h4>
+                        <p class="text-sm text-slate-400">A page fault occurs when the CPU needs a page but it is not present in RAM, so the OS loads it from the hard disk.</p>
+                    <p class="text-sm text-slate-400">Page Fault तेव्हा होतो जेव्हा CPU ला page लागतो पण तो RAM मध्ये नसतो, त्यामुळे Operating System तो Hard Disk वरून RAM मध्ये आणतो.</p>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                        <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-exchange-alt text-purple-400 mr-2"></i> Page Replacement</h4>
+                      <p class="text-sm text-slate-400">Page replacement happens when RAM is full and a new page needs to be loaded. The OS removes one page and loads the new one.</p>
+                      <p class="text-sm text-slate-400">Page Replacement तेव्हा होते जेव्हा RAM full असते आणि नवीन page load करायचा असतो. तेव्हा Operating System एक जुना page काढून नवीन page RAM मध्ये load करते.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8 md:w-1/2 bg-slate-900 flex flex-col items-center justify-center relative">
+                <button onclick="closeTheoryModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h3 class="text-2xl font-bold text-emerald-400 mb-8 text-center">Live Visualization</h3>
+                <div class="relative w-full h-48 bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-inner flex items-center mb-8">
+                    <div class="absolute left-4 flex flex-col items-center">
+                        <div class="w-20 h-28 border-2 border-slate-500 border-dashed rounded flex items-center justify-center text-slate-500 font-bold bg-slate-900">Disk</div>
+                        <p class="text-xs text-slate-400 mt-2">Secondary Memory</p>
+                    </div>
+                    <div id="animPage" class="page-anim-box w-12 h-12 bg-blue-500 text-white font-bold rounded shadow-lg flex items-center justify-center top-1/2 -translate-y-1/2 z-10">P1</div>
+                    <div class="absolute right-12 flex flex-col items-center">
+                        <div class="w-20 h-28 border-2 border-emerald-500 rounded flex flex-col">
+                            <div class="flex-1 border-b border-emerald-500/30 flex items-center justify-center text-xs text-emerald-500/50">Frame 1</div>
+                            <div class="flex-1 flex items-center justify-center text-xs text-emerald-500/50">Frame 2</div>
+                        </div>
+                        <p class="text-xs text-emerald-400 mt-2">RAM (Main Memory)</p>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <p id="animText" class="text-slate-300 mb-4 h-6">CPU requested Page 1...</p>
+                    <button onclick="playAnimation()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition">
+                        <i class="fas fa-play mr-2"></i> Trigger Page Fault
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        
         let currentHits = 0;
         let currentTotal = 0;
 
         async function simulate() {
             const btn = document.getElementById('simBtn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Running in WSL...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Running...';
             
             const payload = {
                 refString: document.getElementById('refString').value,
@@ -138,7 +239,7 @@
             };
 
             try {
-                
+             
                 const response = await fetch('https://os-backend-api.onrender.com/api/simulate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -146,23 +247,25 @@
                 });
 
                 const data = await response.json();
-                
                 if(data.error) throw new Error(data.error);
 
-                renderResults(data, payload.frameCount);
+                renderResults(data, payload.frameCount, payload.algorithm);
                 
             } catch (error) {
-                alert("Error connecting to WSL Backend: " + error.message + "\nMake sure your Node server is running on port 3000!");
+                alert("Error connecting to Backend: " + error.message);
             } finally {
                 btn.innerHTML = originalText;
             }
         }
 
-        function renderResults(data, frameCount) {
+        function renderResults(data, frameCount, algorithmName) {
             document.getElementById('resultsArea').classList.remove('hidden');
+            document.getElementById('creditsFooter').classList.remove('hidden');
      
             currentHits = data.hits;
             currentTotal = data.total;
+
+            
             document.getElementById('statTotal').innerText = data.total;
             document.getElementById('statFaults').innerText = data.faults;
             document.getElementById('statHits').innerText = data.hits;
@@ -170,26 +273,36 @@
             document.getElementById('statRatio').innerText = `${ratio}%`;
 
             const visContainer = document.getElementById('visualization');
+            const logsContainer = document.getElementById('stepLogs');
+            
             visContainer.innerHTML = ''; 
+            logsContainer.innerHTML = '';
+
+            let prevFrames = Array(frameCount).fill(null);
 
             data.steps.forEach((step, index) => {
                 const stepDiv = document.createElement('div');
-                stepDiv.className = 'flex flex-col items-center gap-2 animate-pop';
+                stepDiv.className = 'flex flex-col items-center gap-1 animate-pop';
                 stepDiv.style.animationDelay = `${index * 0.1}s`;
 
                 const isHit = step.status === "HIT";
               
                 const reqDiv = document.createElement('div');
-                reqDiv.className = `w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg mb-2 shadow-lg ${isHit ? 'hit' : 'fault'}`;
+                reqDiv.className = `w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg mb-3 shadow-lg ${isHit ? 'hit' : 'fault'}`;
                 reqDiv.innerText = step.page;
                 stepDiv.appendChild(reqDiv);
 
-                for (let i = 0; i < frameCount; i++) {
+                for (let i = frameCount - 1; i >= 0; i--) {
                     const frameDiv = document.createElement('div');
                     const frameVal = step.frames[i];
                     
-                    frameDiv.className = `w-12 h-12 rounded border-2 flex items-center justify-center font-bold text-lg frame-box ${frameVal === null ? 'empty' : 'bg-slate-700 border-slate-500 text-white'}`;
-                    frameDiv.innerText = frameVal === null ? '-' : frameVal;
+                    frameDiv.className = `w-12 h-12 border-2 flex items-center justify-center font-bold text-xl frame-box ${frameVal === null ? 'empty' : 'bg-slate-700 border-slate-500 text-white'}`;
+                    
+                    if(i === frameCount - 1) frameDiv.classList.add('rounded-t-lg');
+                    if(i === 0) frameDiv.classList.add('rounded-b-lg');
+                    if(i !== 0) frameDiv.classList.add('border-b-0');
+
+                    frameDiv.innerText = frameVal === null ? '' : frameVal;
                     stepDiv.appendChild(frameDiv);
                 }
 
@@ -199,18 +312,65 @@
                 stepDiv.appendChild(statusLabel);
 
                 visContainer.appendChild(stepDiv);
+
+                let explanation = "";
+                if (isHit) {
+                    explanation = `<span class="text-green-400 font-bold text-base">Step ${index + 1}:</span> The CPU requested Page <b>${step.page}</b>. <span class="text-green-400 font-semibold border border-green-400/30 bg-green-400/10 px-2 rounded">Page Hit</span> It was already sitting in the memory frames.`;
+                } else {
+                    let hadEmpty = prevFrames.includes(null);
+                    if (hadEmpty) {
+                        explanation = `<span class="text-red-400 font-bold text-base">Step ${index + 1}:</span> The CPU requested Page <b>${step.page}</b>. <span class="text-red-400 font-semibold border border-red-400/30 bg-red-400/10 px-2 rounded">Page Fault</span> Found an empty frame. Inserted Page <b>${step.page}</b> directly into memory.`;
+                    } else {
+                        let replacedPage = prevFrames.find(p => !step.frames.includes(p));
+                        explanation = `<span class="text-red-400 font-bold text-base">Step ${index + 1}:</span> The CPU requested Page <b>${step.page}</b>. <span class="text-red-400 font-semibold border border-red-400/30 bg-red-400/10 px-2 rounded">Page Fault</span> Memory is 100% full. Using the <b>${algorithmName}</b> algorithm, the OS kicked out Page <b>${replacedPage}</b> and replaced it with Page <b>${step.page}</b>.`;
+                    }
+                }
+                
+                prevFrames = [...step.frames];
+
+                const logItem = document.createElement('div');
+                logItem.className = 'bg-slate-900 p-4 rounded-xl border border-slate-700 mb-3 text-slate-300 animate-pop';
+                logItem.style.animationDelay = `${index * 0.1}s`;
+                logItem.innerHTML = explanation;
+                logsContainer.appendChild(logItem);
             });
         }
 
+        // --- RESTORED: Formula Modal Logic ---
         function showFormulaModal() {
-           
             const dynamicMath = `(${currentHits} ÷ ${currentTotal}) × 100 = ${((currentHits/currentTotal)*100).toFixed(1)}%`;
             document.getElementById('dynamicFormula').innerText = dynamicMath;
-        
             document.getElementById('formulaModal').classList.remove('hidden');
         }
         function closeFormulaModal() {
             document.getElementById('formulaModal').classList.add('hidden');
+        }
+
+        function showTheoryModal() {
+            document.getElementById('theoryModal').classList.remove('hidden');
+            resetAnimation();
+        }
+        function closeTheoryModal() {
+            document.getElementById('theoryModal').classList.add('hidden');
+            resetAnimation();
+        }
+        function resetAnimation() {
+            const page = document.getElementById('animPage');
+            const text = document.getElementById('animText');
+            page.classList.remove('move-to-ram');
+            page.style.backgroundColor = '#3b82f6'; 
+            text.innerHTML = 'CPU requested Page 1...';
+        }
+        function playAnimation() {
+            const page = document.getElementById('animPage');
+            const text = document.getElementById('animText');
+            
+            page.classList.add('move-to-ram');
+            text.innerHTML = '<span class="text-red-400 font-bold">Page Fault!</span> Fetching from Hard Drive...';
+            
+            setTimeout(() => {
+                text.innerHTML = '<span class="text-green-400 font-bold">Success!</span> Page 1 is now in RAM Frame.';
+            }, 1500);
         }
     </script>
 </body>
